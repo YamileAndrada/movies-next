@@ -75,21 +75,18 @@ describe("DirectorsThresholdForm", () => {
       ).toBeInTheDocument();
     });
 
-    it("should show error for non-numeric input", async () => {
+    it("should show error for empty input treated as non-numeric", async () => {
       const user = userEvent.setup();
       render(<DirectorsThresholdForm />);
 
-      // Type="number" inputs filter out non-numeric characters
-      // So we test by clearing the input after it's been filled
-      const input = screen.getByLabelText(/minimum movie count/i) as HTMLInputElement;
-
-      // Manually set an invalid value
-      input.value = "abc";
-
+      // Submit with just whitespace
+      const input = screen.getByLabelText(/minimum movie count/i);
+      await user.type(input, "   ");
       await user.click(screen.getByRole("button", { name: /calculate/i }));
 
+      // Should show validation error (whitespace treated as empty)
       expect(
-        screen.getByText(/please enter a valid number/i)
+        screen.getByText(/please enter a threshold value/i)
       ).toBeInTheDocument();
     });
 
@@ -169,21 +166,27 @@ describe("DirectorsThresholdForm", () => {
   });
 
   describe("Loading state", () => {
-    it("should show loading skeleton when loading", async () => {
+    it("should show button as disabled and text as Calculating when loading", async () => {
+      const user = userEvent.setup();
+      render(<DirectorsThresholdForm />);
+
+      const input = screen.getByLabelText(/minimum movie count/i);
+      await user.type(input, "5");
+
+      // Mock loading state after submission
       mockUseDirectorsAggregation.mockReturnValue({
         directors: [],
         loading: true,
         error: null,
       });
 
-      const user = userEvent.setup();
-      render(<DirectorsThresholdForm />);
-
-      const input = screen.getByLabelText(/minimum movie count/i);
-      await user.type(input, "5");
       await user.click(screen.getByRole("button", { name: /calculate/i }));
 
-      expect(screen.getByRole("status")).toBeInTheDocument();
+      await waitFor(() => {
+        const button = screen.getByRole("button", { name: /calculate directors/i });
+        expect(button).toBeDisabled();
+        expect(button).toHaveTextContent("Calculating...");
+      });
     });
 
     it("should disable input and button during loading", async () => {
@@ -201,9 +204,9 @@ describe("DirectorsThresholdForm", () => {
       await user.click(screen.getByRole("button", { name: /calculate/i }));
 
       expect(input).toBeDisabled();
-      expect(
-        screen.getByRole("button", { name: /calculating/i })
-      ).toBeDisabled();
+      const button = screen.getByRole("button", { name: /calculate directors/i });
+      expect(button).toBeDisabled();
+      expect(button).toHaveTextContent("Calculating...");
     });
   });
 

@@ -13,7 +13,7 @@ Allows users to search for directors who have directed more than a specified num
 
 ## Structure
 
-- **components/** - UI components for the directors threshold form and results display
+- **components/** - UI components for the directors threshold form and results display ✅ Implemented
 - **hooks/** - Custom React hooks like `useDirectorsAggregation` ✅ Implemented
 - **aggregators/** - Pure functions for director aggregation logic ✅ Implemented
 - **tests/** - Unit and component tests for this feature
@@ -128,6 +128,70 @@ function DirectorsPage() {
 - Empty movie list → returns empty directors array
 
 **Tests:** 17 tests covering all scenarios ✅
+
+---
+
+### `components/DirectorsThresholdForm.tsx` ✅ Implemented
+
+Complete form component for directors threshold functionality.
+
+**Component Overview:**
+
+Full-featured form with input validation, loading states, error handling, and accessible results display.
+
+**Features:**
+- ✅ Numeric input with accessible label
+- ✅ Client-side validation (no API call for invalid input)
+- ✅ "Calculate" button triggers aggregation
+- ✅ Loading skeleton while fetching
+- ✅ Error message display
+- ✅ Empty state messaging
+- ✅ Success state with directors list
+- ✅ Complete keyboard navigation
+- ✅ Proper ARIA attributes
+
+**States:**
+1. **Initial**: Form ready for input
+2. **Validation Error**: Shows error message, no API call
+3. **Loading**: Skeleton UI, disabled inputs
+4. **Error**: API error message with retry suggestion
+5. **Empty**: No results found message
+6. **Success**: Directors table with counts
+
+**Accessibility:**
+- Semantic HTML with proper labels
+- ARIA attributes (`aria-invalid`, `aria-describedby`, `aria-live`)
+- Role attributes for table structure
+- Keyboard navigation (Tab, Enter, Space)
+- Screen reader support
+- Focus management
+
+**Validation:**
+- Empty input → "Please enter a threshold value"
+- Invalid input → "Please enter a valid number"
+- Clears error when user starts typing
+- Negative threshold accepted (shows appropriate empty message)
+
+**Example:**
+```typescript
+import { DirectorsThresholdForm } from '@/features/directors/components';
+
+export default function DirectorsPage() {
+  return (
+    <main>
+      <DirectorsThresholdForm />
+    </main>
+  );
+}
+```
+
+**Sub-components:**
+- `LoadingSkeleton`: Animated skeleton for loading state
+- `ErrorMessage`: Error display with icon and retry message
+- `EmptyState`: No results message with icon
+- `DirectorsList`: Table display with director names and counts
+
+**Tests:** 23 tests covering all states and interactions ✅
 
 ---
 
