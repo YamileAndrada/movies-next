@@ -369,18 +369,6 @@ Haz una auditoría final de:
 
 ---
 
-## Notas de Uso
-
-- **Orden recomendado**: Seguir los prompts en secuencia (0 → 6)
-- **Flexibilidad**: Puedes saltar u omitir prompts según tu stack (ej: si no usas React Query)
-- **Iteración**: Algunos prompts pueden necesitar refinamiento según lo que descubras
-- **Testing**: No dejes los tests para el final, hazlos junto con cada feature (TDD)
-- **Commits**: Haz commits incrementales después de cada prompt exitoso
-
----
-
-## Prompts Bonus (Opcionales)
-
 ### Bonus 1: Dark mode
 ```
 Implementa dark mode con next-themes:
@@ -390,19 +378,3 @@ Implementa dark mode con next-themes:
 - Respeta prefers-color-scheme del OS
 ```
 
-### Bonus 2: Analytics tracking
-```
-Añade tracking básico con Vercel Analytics o similar:
-- Page views
-- Eventos personalizados (threshold calculation, filter applied)
-- No PII, respetando privacidad
-```
-
-### Bonus 3: Deploy a Vercel
-```
-Despliega la app a Vercel:
-- Conecta repo de GitHub
-- Configura variables de entorno si hay
-- Setup de preview deployments para PRs
-- Custom domain (opcional)
-```
