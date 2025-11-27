@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { QueryProvider } from "@/core/providers";
 
 export const metadata: Metadata = {
   title: "Movies Challenge - IUGO Labs",
   description:
-    "Movie search and director analysis application. Built with Next.js 15, TypeScript, React Query, and TanStack Table.",
+    "Movie search and director analysis application. Built with Next.js 15, TypeScript, SWR, and TanStack Table.",
   keywords: [
     "movies",
     "directors",
@@ -24,9 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
-        <QueryProvider>{children}</QueryProvider>
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

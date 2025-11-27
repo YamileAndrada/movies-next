@@ -32,7 +32,7 @@ Movie search and director analysis application built with Next.js 15, TypeScript
 - **Data Fetching**: SWR - caching, deduplication, background refetch
 - **Tables**: TanStack Table v8
 - **Styling**: Tailwind CSS
-- **Testing**: Vitest + Testing Library (256 tests, 100% coverage)
+- **Testing**: Vitest + Testing Library (256 unit tests) + Playwright (E2E)
 
 ## Project Structure
 
@@ -109,10 +109,17 @@ npm run typecheck    # TypeScript type checking
 ### Testing
 
 ```bash
+# Unit & Component Tests
 npm run test              # Run all tests
 npm run test:watch        # Run tests in watch mode
 npm run test:ui           # Open Vitest UI
 npm run test:coverage     # Run tests with coverage
+
+# E2E Tests
+npm run test:e2e          # Run Playwright E2E tests
+npm run test:e2e:ui       # Open Playwright UI
+npm run test:e2e:headed   # Run E2E tests in headed mode
+npm run test:e2e:debug    # Debug E2E tests
 ```
 
 ## API

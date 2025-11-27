@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm test:*)",
       "Bash(npm install:*)",
-      "Bash(node fix-swr-tests.js:*)"
+      "Bash(node fix-swr-tests.js:*)",
+      "Bash(npx playwright test:*)"
     ],
     "deny": [],
     "ask": []

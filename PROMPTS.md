@@ -312,11 +312,19 @@ Instala y configura Playwright para tests E2E:
 - Test de flujo completo: Movies explorer → filtrar → ver detalles
 - Test de validaciones y errores
 - Test de accesibilidad básica con axe-core
+
+--> Modificado a 
+Instala y Configura Playwright para tests E2E:
+- 1 test E2E del flujo Directores (threshold → calcular → resultados).
+- 1 test E2E del flujo Películas (filtros → paginación → detalles).
+- 1 test de validaciones/errores.
+- 1 test básico de accesibilidad con axe-core.
+
 ```
 
 ### Prompt 27: Escribir E2E tests principales
 ```
-Crea tests E2E para:
+Crea tests E2E mìnimos para:
 1. Directors flow:
    - Navegar a /directors
    - Ingresar threshold válido

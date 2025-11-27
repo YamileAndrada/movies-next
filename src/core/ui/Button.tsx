@@ -35,6 +35,7 @@ export function Button({
     <button
       {...rest}
       disabled={isDisabled}
+      aria-busy={loading ? "true" : undefined}
       className={`${base} ${variants[variant]} ${isDisabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
     >
       {loading && (

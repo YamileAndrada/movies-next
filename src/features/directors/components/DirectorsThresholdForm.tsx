@@ -71,7 +71,8 @@ export function DirectorsThresholdForm() {
           <div className="flex-1">
             <Input
               id="threshold-input"
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={inputValue}
               onChange={(e) => handleInputChange(e.target.value)}
               placeholder="Enter a number (e.g., 5)"
@@ -93,8 +94,8 @@ export function DirectorsThresholdForm() {
           </div>
 
           <div className="sm:pt-6">
-            <Button type="submit" disabled={loading} variant="primary" aria-label="Calculate directors">
-              {loading ? "Calculating..." : "Calculate"}
+            <Button type="submit" loading={loading} variant="primary" aria-label="Calculate directors">
+              Calculate
             </Button>
           </div>
         </div>

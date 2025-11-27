@@ -15,7 +15,7 @@ export function SWRTestProvider({ children }: { children: React.ReactNode }) {
 
 /**
  * Custom render function that wraps components with common providers
- * Add any global providers here (e.g., ThemeProvider, QueryClientProvider, etc.)
+ * Add any global providers here (e.g., ThemeProvider, SWRConfig, etc.)
  */
 function customRender(
   ui: ReactElement,
