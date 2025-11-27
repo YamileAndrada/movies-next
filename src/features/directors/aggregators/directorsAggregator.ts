@@ -35,6 +35,11 @@ export function aggregateDirectors(
     return [];
   }
 
+  // Requirement: threshold < 0 should return empty list (no error)
+  if (threshold < 0) {
+    return [];
+  }
+
   // Aggregate movie counts per director
   // Map: normalized name -> { original name, count }
   const directorMap = new Map<

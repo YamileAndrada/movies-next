@@ -1,5 +1,17 @@
-import { render, RenderOptions } from "@testing-library/react";
+import { render, RenderOptions, renderHook as rtlRenderHook, RenderHookOptions } from "@testing-library/react";
 import { ReactElement } from "react";
+import { SWRConfig } from "swr";
+
+/**
+ * SWR wrapper for tests - disables cache and deduping
+ */
+export function SWRTestProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
+      {children}
+    </SWRConfig>
+  );
+}
 
 /**
  * Custom render function that wraps components with common providers
@@ -17,8 +29,21 @@ function customRender(
   return render(ui, options);
 }
 
+/**
+ * Custom renderHook that wraps hooks with SWR provider
+ */
+function customRenderHook<Result, Props>(
+  hook: (props: Props) => Result,
+  options?: RenderHookOptions<Props>
+) {
+  return rtlRenderHook(hook, {
+    wrapper: SWRTestProvider,
+    ...options,
+  });
+}
+
 // Re-export everything from React Testing Library
 export * from "@testing-library/react";
 
-// Override render method
-export { customRender as render };
+// Override render and renderHook methods
+export { customRender as render, customRenderHook as renderHook };

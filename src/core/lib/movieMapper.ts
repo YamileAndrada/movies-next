@@ -4,6 +4,7 @@ import type { Movie } from "@/core/api/types";
  * Normalized movie data with clean, consistent values
  */
 export interface NormalizedMovie {
+  id?: string;
   title: string;
   year: number | null;
   rated: string;
@@ -13,8 +14,23 @@ export interface NormalizedMovie {
   directors: string[];
   writers: string[];
   actors: string[];
-  // Keep original data for reference
-  original: Movie;
+  plot?: string;
+  languages?: string[];
+  country?: string;
+  awards?: string;
+  poster?: string;
+  ratings?: any[];
+  metascore?: number;
+  imdbRating?: number;
+  imdbVotes?: number;
+  imdbID?: string;
+  type?: string;
+  dvd?: string;
+  boxOffice?: string;
+  production?: string;
+  website?: string;
+  // Keep original data for reference (optional in tests)
+  original?: Movie;
 }
 
 /**
@@ -136,14 +152,23 @@ export function parseCommaSeparated(value: string): string[] {
 }
 
 /**
+ * Removes accents/diacritics from a string for better matching
+ * @param str - String with potential accents
+ * @returns String without accents
+ */
+export function removeAccents(str: string): string {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/**
  * Gets director name normalized for comparison
- * (lowercase, trimmed, no extra spaces)
+ * (lowercase, trimmed, no extra spaces, no accents)
  *
  * @param director - Director name
  * @returns Normalized director name
  */
 export function normalizeDirectorName(director: string): string {
-  return safeString(director)
+  return removeAccents(safeString(director))
     .toLowerCase()
     .replace(/\s+/g, " "); // Replace multiple spaces with single space
 }

@@ -197,7 +197,7 @@ Crea /src/features/movies/components/MoviesTable.tsx:
 ### Prompt 16: Componente MovieDetailsModal
 ```
 Crea /src/features/movies/components/MovieDetailsModal.tsx:
-- Drawer o modal (role="dialog")
+- modal (role="dialog")
 - Muestra todos los campos: Title, Year, Rated, Released, Runtime, Genre, Director, Writer, Actors
 - Botón cerrar con keyboard support (Escape key)
 - Focus trap dentro del modal
@@ -246,7 +246,7 @@ Usa next/dynamic para componentes Next.js específicos.
 
 ### Prompt 21: Opcional - Integrar React Query o SWR
 ```
-Si no se hizo antes, integra React Query o SWR para:
+Si no se hizo antes, integra SWR para:
 - Cache de requests
 - Invalidación automática
 - Refetch en background

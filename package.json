@@ -17,12 +17,15 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.11",
+    "@tanstack/react-table": "^8.21.3",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "next": "^15.5.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "swr": "^2.3.6",
     "typescript": "^5.9.3"
   },
   "devDependencies": {

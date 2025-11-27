@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@/test/test-utils";
 import { useMoviesSearch } from "./useMoviesSearch";
 import * as moviesApi from "@/core/api/moviesApi";
-import type { Movie, MoviesResponse } from "@/core/api/types";
+import type { Movie } from "@/core/api/types";
 import { NetworkError } from "@/core/api/types";
 
 // Mock the API module
 vi.mock("@/core/api/moviesApi", () => ({
-  fetchMoviesPage: vi.fn(),
+  fetchAllMovies: vi.fn(),
 }));
 
 // Helper to create mock movie
@@ -36,15 +36,7 @@ describe("useMoviesSearch", () => {
         createMovie({ Title: "The Matrix Reloaded", Year: "2003" }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 2,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() => useMoviesSearch({}, 1));
 
@@ -64,15 +56,12 @@ describe("useMoviesSearch", () => {
     });
 
     it("should handle pagination", async () => {
-      const mockResponse: MoviesResponse = {
-        page: 2,
-        per_page: 10,
-        total: 50,
-        total_pages: 5,
-        data: [createMovie()],
-      };
+      // Create 25 movies for pagination testing (10 per page)
+      const mockMovies: Movie[] = Array.from({ length: 25 }, (_, i) =>
+        createMovie({ Title: `Movie ${i + 1}` })
+      );
 
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() => useMoviesSearch({}, 2));
 
@@ -81,29 +70,22 @@ describe("useMoviesSearch", () => {
       });
 
       expect(result.current.currentPage).toBe(2);
-      expect(result.current.totalPages).toBe(5);
-      expect(moviesApi.fetchMoviesPage).toHaveBeenCalledWith(2, expect.any(AbortSignal));
+      expect(result.current.totalPages).toBe(3); // 25 movies / 10 per page = 3 pages
+      expect(result.current.movies).toHaveLength(10); // Page 2 should have 10 movies
     });
 
-    it("should pass AbortSignal to API", async () => {
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 1,
-        total_pages: 1,
-        data: [createMovie()],
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+    it("should call fetchAllMovies via SWR", async () => {
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue([createMovie()]);
 
       renderHook(() => useMoviesSearch({}, 1));
 
       await waitFor(() => {
-        expect(moviesApi.fetchMoviesPage).toHaveBeenCalled();
+        expect(moviesApi.fetchAllMovies).toHaveBeenCalled();
       });
 
-      const calls = vi.mocked(moviesApi.fetchMoviesPage).mock.calls;
-      expect(calls[0][1]).toBeInstanceOf(AbortSignal);
+      // SWR calls the fetcher function with the key and fetcherOptions
+      const calls = vi.mocked(moviesApi.fetchAllMovies).mock.calls;
+      expect(calls.length).toBeGreaterThan(0);
     });
   });
 
@@ -115,15 +97,7 @@ describe("useMoviesSearch", () => {
         createMovie({ Title: "Inception" }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 3,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ title: "Matrix" }, 1)
@@ -141,15 +115,7 @@ describe("useMoviesSearch", () => {
     it("should handle case-insensitive title search", async () => {
       const mockMovies: Movie[] = [createMovie({ Title: "The Matrix" })];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 1,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ title: "MATRIX" }, 1)
@@ -165,15 +131,7 @@ describe("useMoviesSearch", () => {
     it("should trim whitespace from title filter", async () => {
       const mockMovies: Movie[] = [createMovie({ Title: "The Matrix" })];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 1,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ title: "  Matrix  " }, 1)
@@ -194,15 +152,7 @@ describe("useMoviesSearch", () => {
         createMovie({ Title: "Recent Movie", Year: "2020" }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 2,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ yearFrom: 2000 }, 1)
@@ -222,15 +172,7 @@ describe("useMoviesSearch", () => {
         createMovie({ Title: "Recent Movie", Year: "2020" }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 2,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ yearTo: 2000 }, 1)
@@ -251,15 +193,7 @@ describe("useMoviesSearch", () => {
         createMovie({ Title: "Recent Movie", Year: "2020" }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 3,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ yearFrom: 1995, yearTo: 2005 }, 1)
@@ -281,15 +215,7 @@ describe("useMoviesSearch", () => {
         createMovie({ Title: "Drama Movie", Genre: "Drama" }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 2,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ genres: ["Action"] }, 1)
@@ -310,15 +236,7 @@ describe("useMoviesSearch", () => {
         createMovie({ Title: "Comedy Movie", Genre: "Comedy" }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 3,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ genres: ["Action", "Drama"] }, 1)
@@ -336,15 +254,7 @@ describe("useMoviesSearch", () => {
         createMovie({ Title: "Action Movie", Genre: "Action, Sci-Fi" }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 1,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ genres: ["action"] }, 1)
@@ -371,15 +281,7 @@ describe("useMoviesSearch", () => {
         }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 2,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ director: "Nolan" }, 1)
@@ -401,15 +303,7 @@ describe("useMoviesSearch", () => {
         }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 1,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ director: "NOLAN" }, 1)
@@ -446,15 +340,7 @@ describe("useMoviesSearch", () => {
         }),
       ];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 3,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch(
@@ -483,7 +369,7 @@ describe("useMoviesSearch", () => {
   describe("Error handling", () => {
     it("should handle API errors", async () => {
       const mockError = new NetworkError("Network error");
-      vi.mocked(moviesApi.fetchMoviesPage).mockRejectedValue(mockError);
+      vi.mocked(moviesApi.fetchAllMovies).mockRejectedValue(mockError);
 
       const { result } = renderHook(() => useMoviesSearch({}, 1));
 
@@ -496,94 +382,91 @@ describe("useMoviesSearch", () => {
       expect(result.current.totalPages).toBe(0);
     });
 
-    it("should handle invalid page number", () => {
+    it("should handle invalid page number", async () => {
+      const mockMovies: Movie[] = [createMovie()];
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
+
       const { result } = renderHook(() => useMoviesSearch({}, -1));
 
-      expect(result.current.loading).toBe(false);
-      expect(result.current.movies).toEqual([]);
-      expect(result.current.totalPages).toBe(0);
-      expect(moviesApi.fetchMoviesPage).not.toHaveBeenCalled();
+      // Hook normalizes invalid page to 1, so it will load
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.currentPage).toBe(1);
+      expect(result.current.movies).toHaveLength(1);
     });
 
-    it("should handle page = 0", () => {
+    it("should handle page = 0", async () => {
+      const mockMovies: Movie[] = [createMovie()];
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
+
       const { result } = renderHook(() => useMoviesSearch({}, 0));
 
-      expect(result.current.loading).toBe(false);
-      expect(result.current.movies).toEqual([]);
-      expect(result.current.totalPages).toBe(0);
+      // Hook normalizes 0 to 1, so it will load
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.currentPage).toBe(1);
+      expect(result.current.movies).toHaveLength(1);
     });
   });
 
   describe("Request cancellation", () => {
-    it("should cancel previous request when filters change", async () => {
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 1,
-        total_pages: 1,
-        data: [createMovie()],
-      };
+    it("should not re-fetch when filters change (client-side filtering)", async () => {
+      const mockMovies: Movie[] = [
+        createMovie({ Title: "The Matrix" }),
+        createMovie({ Title: "Inception" }),
+      ];
 
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { rerender } = renderHook(
         ({ filters, page }) => useMoviesSearch(filters, page),
         { initialProps: { filters: { title: "Matrix" }, page: 1 } }
       );
 
-      // Change filters
-      rerender({ filters: { title: "Inception" }, page: 1 });
-
       await waitFor(() => {
-        expect(moviesApi.fetchMoviesPage).toHaveBeenCalledTimes(2);
+        expect(moviesApi.fetchAllMovies).toHaveBeenCalledTimes(1);
       });
 
-      // First call should have been cancelled
-      const firstCall = vi.mocked(moviesApi.fetchMoviesPage).mock.calls[0];
-      const firstSignal = firstCall[1] as AbortSignal;
-      expect(firstSignal?.aborted).toBe(true);
+      // Change filters - should not trigger new API call (client-side filtering)
+      rerender({ filters: { title: "Inception" }, page: 1 });
+
+      // Should still only have one API call
+      expect(moviesApi.fetchAllMovies).toHaveBeenCalledTimes(1);
     });
 
-    it("should cancel request when page changes", async () => {
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 1,
-        total_pages: 1,
-        data: [createMovie()],
-      };
+    it("should not re-fetch when page changes (client-side pagination)", async () => {
+      const mockMovies: Movie[] = Array.from({ length: 25 }, (_, i) =>
+        createMovie({ Title: `Movie ${i + 1}` })
+      );
 
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { rerender } = renderHook(
         ({ filters, page }) => useMoviesSearch(filters, page),
         { initialProps: { filters: {}, page: 1 } }
       );
 
-      // Change page
-      rerender({ filters: {}, page: 2 });
-
       await waitFor(() => {
-        expect(moviesApi.fetchMoviesPage).toHaveBeenCalledTimes(2);
+        expect(moviesApi.fetchAllMovies).toHaveBeenCalledTimes(1);
       });
 
-      const firstCall = vi.mocked(moviesApi.fetchMoviesPage).mock.calls[0];
-      const firstSignal = firstCall[1] as AbortSignal;
-      expect(firstSignal?.aborted).toBe(true);
+      // Change page - should not trigger new API call (client-side pagination)
+      rerender({ filters: {}, page: 2 });
+
+      // Should still only have one API call
+      expect(moviesApi.fetchAllMovies).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("Memoization", () => {
     it("should not re-fetch when filter object changes but values are same", async () => {
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 1,
-        total_pages: 1,
-        data: [createMovie()],
-      };
+      const mockMovies: Movie[] = [createMovie()];
 
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { rerender } = renderHook(
         ({ filters, page }) => useMoviesSearch(filters, page),
@@ -591,41 +474,40 @@ describe("useMoviesSearch", () => {
       );
 
       await waitFor(() => {
-        expect(moviesApi.fetchMoviesPage).toHaveBeenCalledTimes(1);
+        expect(moviesApi.fetchAllMovies).toHaveBeenCalledTimes(1);
       });
 
       // Create new object with same values
       rerender({ filters: { title: "Matrix" }, page: 1 });
 
-      // Should not trigger new fetch (memoized)
-      expect(moviesApi.fetchMoviesPage).toHaveBeenCalledTimes(1);
+      // Should not trigger new fetch (SWR caching)
+      expect(moviesApi.fetchAllMovies).toHaveBeenCalledTimes(1);
     });
 
-    it("should normalize genre array order for memoization", async () => {
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 1,
-        total_pages: 1,
-        data: [createMovie()],
-      };
+    it("should return same filtered results for different genre order", async () => {
+      const mockMovies: Movie[] = [
+        createMovie({ Title: "Action Drama", Genre: "Action, Drama" }),
+      ];
 
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
-      const { rerender } = renderHook(
+      const { result, rerender } = renderHook(
         ({ filters, page }) => useMoviesSearch(filters, page),
         { initialProps: { filters: { genres: ["Action", "Drama"] }, page: 1 } }
       );
 
       await waitFor(() => {
-        expect(moviesApi.fetchMoviesPage).toHaveBeenCalledTimes(1);
+        expect(moviesApi.fetchAllMovies).toHaveBeenCalledTimes(1);
       });
 
-      // Same genres in different order
+      const firstResult = result.current.movies;
+
+      // Same genres in different order - should return same filtered results
       rerender({ filters: { genres: ["Drama", "Action"] }, page: 1 });
 
-      // Should not trigger new fetch (memoized - sorted)
-      expect(moviesApi.fetchMoviesPage).toHaveBeenCalledTimes(1);
+      expect(result.current.movies).toEqual(firstResult);
+      // Should not trigger new fetch (SWR caching)
+      expect(moviesApi.fetchAllMovies).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -633,15 +515,7 @@ describe("useMoviesSearch", () => {
     it("should return empty array when no movies match filters", async () => {
       const mockMovies: Movie[] = [createMovie({ Title: "The Matrix" })];
 
-      const mockResponse: MoviesResponse = {
-        page: 1,
-        per_page: 10,
-        total: 1,
-        total_pages: 1,
-        data: mockMovies,
-      };
-
-      vi.mocked(moviesApi.fetchMoviesPage).mockResolvedValue(mockResponse);
+      vi.mocked(moviesApi.fetchAllMovies).mockResolvedValue(mockMovies);
 
       const { result } = renderHook(() =>
         useMoviesSearch({ title: "Inception" }, 1)
@@ -652,7 +526,7 @@ describe("useMoviesSearch", () => {
       });
 
       expect(result.current.movies).toEqual([]);
-      expect(result.current.totalPages).toBe(1);
+      expect(result.current.totalPages).toBe(0); // 0 pages when no movies match filters
     });
   });
 });

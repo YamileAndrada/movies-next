@@ -7,13 +7,24 @@ import {
   AbortError,
 } from "./types";
 
-const API_BASE_URL = "https://challenge.iugolabs.com/api/movies/search";
+/**
+ * API Base URL - reads from environment variable with fallback
+ * Use NEXT_PUBLIC_API_BASE_URL in .env to override
+ */
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://challenge.iugolabs.com/api/movies/search";
 
 /**
  * Cache for in-flight requests to prevent duplicate calls
  * Key: page number, Value: Promise<MoviesResponse>
  */
 const inflightRequests = new Map<number, Promise<MoviesResponse>>();
+
+// Simple response cache to avoid repeated network calls for the same page
+// within a short time window (helps in dev/StrictMode and multiple consumers)
+const responseCache = new Map<number, { data: MoviesResponse; ts: number }>();
+const CACHE_TTL_MS = 5_000; // 5 seconds
 
 /**
  * Fetches a single page of movies from the API
@@ -39,6 +50,12 @@ export async function fetchMoviesPage(
   const existingRequest = inflightRequests.get(page);
   if (existingRequest) {
     return existingRequest;
+  }
+
+  // Return cached response if recent
+  const cached = responseCache.get(page);
+  if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+    return Promise.resolve(cached.data);
   }
 
   // Create new request
@@ -70,6 +87,13 @@ export async function fetchMoviesPage(
 
       if (!Array.isArray(data.data)) {
         throw new ApiError("Invalid response: missing or invalid 'data' array");
+      }
+
+      // Cache successful response
+      try {
+        responseCache.set(page, { data, ts: Date.now() });
+      } catch (e) {
+        // ignore cache set failures
       }
 
       return data;
@@ -171,4 +195,12 @@ export function cancelAllRequests(): void {
  */
 export function getInflightRequestCount(): number {
   return inflightRequests.size;
+}
+
+/**
+ * Clears the response cache
+ * Useful for testing to ensure clean state
+ */
+export function clearCache(): void {
+  responseCache.clear();
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, memo, useRef } from "react";
+import { Input, Button, Select } from "@/core/ui";
 import type { MoviesSearchFilters } from "../hooks";
 
 /**
@@ -24,15 +25,16 @@ export interface MoviesFiltersProps {
 /**
  * Filters component for movies search
  * Provides inputs for title, year range, genres, and director filtering
+ * Memoized to prevent unnecessary re-renders
  */
-export function MoviesFilters({
+const MoviesFiltersComponent = ({
   filters,
   onFiltersChange,
   availableGenres = [],
   availableDirectors = [],
   realtimeFiltering = true,
   debounceMs = 300,
-}: MoviesFiltersProps) {
+}: MoviesFiltersProps) => {
   // Local state for form inputs
   const [title, setTitle] = useState(filters.title || "");
   const [yearFrom, setYearFrom] = useState(
@@ -44,6 +46,18 @@ export function MoviesFilters({
   );
   const [directorSearch, setDirectorSearch] = useState(filters.director || "");
   const [showDirectorSuggestions, setShowDirectorSuggestions] = useState(false);
+  const blurTimeoutRef = useRef<number | null>(null);
+
+  const applyFilters = useCallback(() => {
+    const newFilters: MoviesSearchFilters = {
+      title: title.trim() || undefined,
+      yearFrom: yearFrom ? parseInt(yearFrom, 10) : undefined,
+      yearTo: yearTo ? parseInt(yearTo, 10) : undefined,
+      genres: selectedGenres.length > 0 ? selectedGenres : undefined,
+      director: directorSearch.trim() || undefined,
+    };
+    onFiltersChange(newFilters);
+  }, [title, yearFrom, yearTo, selectedGenres, directorSearch, onFiltersChange]);
 
   // Debounced filter application for realtime filtering
   useEffect(() => {
@@ -54,7 +68,16 @@ export function MoviesFilters({
     }, debounceMs);
 
     return () => clearTimeout(timeoutId);
-  }, [title, yearFrom, yearTo, selectedGenres, directorSearch, realtimeFiltering, debounceMs]);
+  }, [applyFilters, realtimeFiltering, debounceMs]);
+
+  // Cleanup any pending blur timeout on unmount to avoid side-effects after tests
+  useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Filter director suggestions based on search input
   const directorSuggestions = useMemo(() => {
@@ -66,25 +89,6 @@ export function MoviesFilters({
       .slice(0, 10); // Limit to 10 suggestions
   }, [directorSearch, availableDirectors]);
 
-  const applyFilters = useCallback(() => {
-    const newFilters: MoviesSearchFilters = {
-      title: title.trim() || undefined,
-      yearFrom: yearFrom ? parseInt(yearFrom, 10) : undefined,
-      yearTo: yearTo ? parseInt(yearTo, 10) : undefined,
-      genres: selectedGenres.length > 0 ? selectedGenres : undefined,
-      director: directorSearch.trim() || undefined,
-    };
-
-    onFiltersChange(newFilters);
-  }, [title, yearFrom, yearTo, selectedGenres, directorSearch, onFiltersChange]);
-
-  const handleGenreToggle = (genre: string) => {
-    setSelectedGenres((prev) =>
-      prev.includes(genre)
-        ? prev.filter((g) => g !== genre)
-        : [...prev, genre]
-    );
-  };
 
   const handleDirectorSelect = (director: string) => {
     setDirectorSearch(director);
@@ -104,20 +108,20 @@ export function MoviesFilters({
     title || yearFrom || yearTo || selectedGenres.length > 0 || directorSearch;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Filters</h2>
-        {hasActiveFilters && (
-          <button
+    <div>
+      {hasActiveFilters && (
+        <div className="flex justify-end mb-4">
+          <Button
             type="button"
             onClick={handleClearFilters}
-            className="text-sm text-blue-600 hover:text-blue-700 focus:outline-none focus:underline"
+            variant="ghost"
+            className="text-sm"
             aria-label="Clear all filters"
           >
             Clear all
-          </button>
-        )}
-      </div>
+          </Button>
+        </div>
+      )}
 
       <form
         onSubmit={(e) => {
@@ -136,13 +140,11 @@ export function MoviesFilters({
           >
             Title
           </label>
-          <input
+          <Input
             id="title-filter"
-            type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Search by title..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-describedby="title-help"
           />
           <p id="title-help" className="mt-1 text-xs text-gray-500">
@@ -159,15 +161,14 @@ export function MoviesFilters({
             >
               Year From
             </label>
-            <input
+            <Input
               id="year-from"
               type="number"
               value={yearFrom}
               onChange={(e) => setYearFrom(e.target.value)}
               placeholder="1900"
-              min="1800"
-              max="2100"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              min={1800}
+              max={2100}
             />
           </div>
           <div>
@@ -177,49 +178,42 @@ export function MoviesFilters({
             >
               Year To
             </label>
-            <input
+            <Input
               id="year-to"
               type="number"
               value={yearTo}
               onChange={(e) => setYearTo(e.target.value)}
               placeholder="2024"
-              min="1800"
-              max="2100"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              min={1800}
+              max={2100}
             />
           </div>
         </div>
 
-        {/* Genre Multi-Select */}
+        {/* Genre Multi-Select (replaced checkbox list with accessible native multi-select) */}
         {availableGenres.length > 0 && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Genres
-            </label>
-            <div
-              className="max-h-40 overflow-y-auto border border-gray-300 rounded-lg p-3 space-y-2"
-              role="group"
-              aria-label="Genre filters"
-            >
-              {availableGenres.map((genre) => (
-                <label
-                  key={genre}
-                  className="flex items-center cursor-pointer hover:bg-gray-50 p-1 rounded"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedGenres.includes(genre)}
-                    onChange={() => handleGenreToggle(genre)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                    aria-label={`Filter by ${genre}`}
-                  />
-                  <span className="ml-2 text-sm text-gray-700">{genre}</span>
-                </label>
-              ))}
-            </div>
-            {selectedGenres.length > 0 && (
+          <div role="group" aria-label="Genre filters">
+            <Select
+              label="Genres"
+              multiple
+              options={availableGenres.map((g) => ({ value: g, label: g }))}
+              id="genres-select"
+              value={selectedGenres}
+              onChange={(e) => {
+                const values = Array.from((e.target as HTMLSelectElement).selectedOptions).map(
+                  (o) => o.value
+                );
+                setSelectedGenres(values);
+              }}
+              aria-describedby={selectedGenres.length > 0 ? undefined : "genres-help"}
+            />
+            {selectedGenres.length > 0 ? (
               <p className="mt-1 text-xs text-gray-500">
                 {selectedGenres.length} genre{selectedGenres.length === 1 ? "" : "s"} selected
+              </p>
+            ) : (
+              <p id="genres-help" className="mt-1 text-xs text-gray-500">
+                Select one or more genres
               </p>
             )}
           </div>
@@ -234,7 +228,7 @@ export function MoviesFilters({
             >
               Director
             </label>
-            <input
+            <Input
               id="director-filter"
               type="text"
               value={directorSearch}
@@ -244,11 +238,13 @@ export function MoviesFilters({
               }}
               onFocus={() => setShowDirectorSuggestions(true)}
               onBlur={() => {
-                // Delay to allow click on suggestion
-                setTimeout(() => setShowDirectorSuggestions(false), 200);
+                // Delay to allow click on suggestion — store timeout so we can clear on unmount
+                if (blurTimeoutRef.current) {
+                  clearTimeout(blurTimeoutRef.current);
+                }
+                blurTimeoutRef.current = window.setTimeout(() => setShowDirectorSuggestions(false), 200);
               }}
               placeholder="Search by director..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-describedby="director-help"
               aria-autocomplete="list"
               aria-controls="director-suggestions"
@@ -263,7 +259,7 @@ export function MoviesFilters({
               <ul
                 id="director-suggestions"
                 role="listbox"
-                className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"
               >
                 {directorSuggestions.map((director) => (
                   <li
@@ -290,14 +286,14 @@ export function MoviesFilters({
 
         {/* Apply Button (only shown if not realtime filtering) */}
         {!realtimeFiltering && (
-          <button
-            type="submit"
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-          >
+          <Button type="submit" variant="primary" className="w-full">
             Apply Filters
-          </button>
+          </Button>
         )}
       </form>
     </div>
   );
 }
+
+// Export memoized component to avoid re-renders when props are stable
+export const MoviesFilters = memo(MoviesFiltersComponent);

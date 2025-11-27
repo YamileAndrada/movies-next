@@ -4,6 +4,7 @@ import {
   fetchAllMovies,
   cancelAllRequests,
   getInflightRequestCount,
+  clearCache,
 } from "./moviesApi";
 import {
   ApiError,
@@ -39,6 +40,7 @@ describe("moviesApi", () => {
     // Clear all mocks before each test
     vi.clearAllMocks();
     cancelAllRequests();
+    clearCache();
   });
 
   afterEach(() => {

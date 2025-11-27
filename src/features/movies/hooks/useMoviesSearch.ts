@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from "react";
-import { fetchMoviesPage } from "@/core/api/moviesApi";
-import { normalizeMovie, type NormalizedMovie } from "@/core/lib";
+import { useMemo } from "react";
+import useSWR from "swr";
+import { fetchAllMovies } from "@/core/api/moviesApi";
+import { normalizeMovie, type NormalizedMovie, removeAccents } from "@/core/lib";
 import type { ApiError } from "@/core/api/types";
 
 /**
@@ -25,8 +26,11 @@ export interface UseMoviesSearchResult {
   currentPage: number;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 /**
  * Hook for searching and filtering movies with pagination
+ * Fetches all movies once, applies client-side filtering and pagination
  *
  * @param filters - Search filters (title, year range, genres, director)
  * @param page - Current page number (1-indexed)
@@ -49,99 +53,45 @@ export function useMoviesSearch(
   filters: MoviesSearchFilters,
   page: number
 ): UseMoviesSearchResult {
-  const [movies, setMovies] = useState<NormalizedMovie[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
-  const [totalPages, setTotalPages] = useState(0);
+  // Validate page number - ensure it's always a valid number
+  const validPage = typeof page === 'number' && page >= 1 ? page : 1;
 
-  // Store AbortController to cancel previous requests
-  const abortControllerRef = useRef<AbortController | null>(null);
+  // Fetch all movies once (cached by SWR)
+  const { data: allMovies, error, isValidating } = useSWR(
+    "all-movies",
+    fetchAllMovies,
+    {
+      dedupingInterval: 30000, // Cache for 30 seconds
+      revalidateOnFocus: false,
+      errorRetryCount: 1,
+    }
+  );
 
-  // Create stable filter key for memoization
-  const filterKey = JSON.stringify({
-    title: filters.title?.trim().toLowerCase() || "",
-    yearFrom: filters.yearFrom || null,
-    yearTo: filters.yearTo || null,
-    genres: filters.genres?.map((g) => g.toLowerCase()).sort() || [],
-    director: filters.director?.trim().toLowerCase() || "",
-  });
-
-  useEffect(() => {
-    // Validate page number
-    if (!Number.isInteger(page) || page < 1) {
-      setMovies([]);
-      setTotalPages(0);
-      setLoading(false);
-      setError(null);
-      return;
+  // Apply filters and pagination client-side
+  const result = useMemo(() => {
+    if (!allMovies) {
+      return { movies: [], totalPages: 0 };
     }
 
-    // Cancel previous request if it exists
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    // Normalize and filter
+    const normalized = allMovies.map(normalizeMovie);
+    const filtered = normalized.filter((m) => matchesFilters(m, filters));
 
-    // Create new AbortController for this request
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+    // Calculate pagination
+    const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+    const startIdx = (validPage - 1) * ITEMS_PER_PAGE;
+    const endIdx = startIdx + ITEMS_PER_PAGE;
+    const paginatedMovies = filtered.slice(startIdx, endIdx);
 
-    // Async function to fetch and filter
-    const fetchAndFilter = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        // Fetch page from API
-        const response = await fetchMoviesPage(page, abortController.signal);
-
-        // Check if request was cancelled
-        if (abortController.signal.aborted) {
-          return;
-        }
-
-        // Normalize movies
-        const normalizedMovies = response.data.map(normalizeMovie);
-
-        // Apply client-side filters
-        const filteredMovies = normalizedMovies.filter((movie) =>
-          matchesFilters(movie, filters)
-        );
-
-        // Only update state if request wasn't cancelled
-        if (!abortController.signal.aborted) {
-          setMovies(filteredMovies);
-          setTotalPages(response.total_pages);
-          setError(null);
-        }
-      } catch (err) {
-        // Only update error state if request wasn't cancelled
-        if (!abortController.signal.aborted) {
-          setError(err as ApiError);
-          setMovies([]);
-          setTotalPages(0);
-        }
-      } finally {
-        // Only update loading state if request wasn't cancelled
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchAndFilter();
-
-    // Cleanup: abort request on unmount or filter/page change
-    return () => {
-      abortController.abort();
-    };
-  }, [filterKey, page]); // Re-run when filters or page changes
+    return { movies: paginatedMovies, totalPages };
+  }, [allMovies, filters, validPage]);
 
   return {
-    movies,
-    loading,
-    error,
-    totalPages,
-    currentPage: page,
+    movies: result.movies,
+    loading: !!isValidating,
+    error: (error as ApiError) ?? null,
+    totalPages: result.totalPages,
+    currentPage: validPage,
   };
 }
 
@@ -185,11 +135,11 @@ function matchesFilters(
     }
   }
 
-  // Director filter (case-insensitive, partial match)
+  // Director filter (case-insensitive, partial match, accent-insensitive)
   if (filters.director) {
-    const searchDirector = filters.director.toLowerCase().trim();
+    const searchDirector = removeAccents(filters.director.toLowerCase().trim());
     const hasMatchingDirector = movie.directors.some((director) =>
-      director.toLowerCase().includes(searchDirector)
+      removeAccents(director.toLowerCase()).includes(searchDirector)
     );
 
     if (!hasMatchingDirector) {

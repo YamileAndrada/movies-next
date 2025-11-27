@@ -49,6 +49,8 @@ export function useDirectorsAggregation(
       return;
     }
 
+    // No module-level cache: keep behavior predictable for tests and freshness
+
     // Cancel previous request if it exists
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();

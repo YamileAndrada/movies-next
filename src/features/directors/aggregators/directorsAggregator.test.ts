@@ -214,10 +214,10 @@ describe("directorsAggregator", () => {
         createMovie("Quentin Tarantino"),
       ];
 
-      // threshold = -1: all directors with count > -1 (all of them)
+      // Requirement: threshold < 0 should return empty list (no error)
       const result = aggregateDirectors(movies, -1);
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(0);
     });
 
     it("should handle threshold = 0", () => {

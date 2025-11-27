@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useDirectorsAggregation } from "../hooks";
+import { Input, Button, SkeletonText, SkeletonBox, ErrorMessage } from "@/core/ui";
 
 /**
  * Form component for directors threshold filtering
@@ -66,37 +67,22 @@ export function DirectorsThresholdForm() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="mb-8" noValidate>
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
           <div className="flex-1">
-            <label
-              htmlFor="threshold-input"
-              className="block text-sm font-medium mb-2"
-            >
-              Minimum Movie Count
-            </label>
-            <input
+            <Input
               id="threshold-input"
               type="number"
               value={inputValue}
               onChange={(e) => handleInputChange(e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                validationError
-                  ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-300"
-              }`}
               placeholder="Enter a number (e.g., 5)"
               aria-invalid={validationError ? "true" : "false"}
-              aria-describedby={
-                validationError ? "threshold-error" : "threshold-help"
-              }
+              aria-describedby={validationError ? "threshold-error" : "threshold-help"}
               disabled={loading}
+              className={validationError ? "border-red-500" : ""}
+              label="Minimum Movie Count"
             />
             {validationError ? (
-              <p
-                id="threshold-error"
-                className="mt-2 text-sm text-red-600"
-                role="alert"
-              >
+              <p id="threshold-error" className="mt-2 text-sm text-red-600" role="alert">
                 {validationError}
               </p>
             ) : (
@@ -106,15 +92,10 @@ export function DirectorsThresholdForm() {
             )}
           </div>
 
-          <div className="flex items-end">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              aria-label="Calculate directors"
-            >
+          <div className="sm:pt-6">
+            <Button type="submit" disabled={loading} variant="primary" aria-label="Calculate directors">
               {loading ? "Calculating..." : "Calculate"}
-            </button>
+            </Button>
           </div>
         </div>
       </form>
@@ -128,10 +109,21 @@ export function DirectorsThresholdForm() {
           className="mt-8"
         >
           {/* Loading State */}
-          {loading && <LoadingSkeleton />}
+          {loading && (
+            <div role="status" aria-label="Loading directors">
+              <SkeletonText lines={1} />
+              <div className="space-y-3 mt-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <SkeletonBox height={3} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Error State */}
-          {!loading && error && <ErrorMessage error={error.message} />}
+          {!loading && error && <ErrorMessage message={error.message} />}
 
           {/* Empty State */}
           {!loading && !error && !hasResults && (
@@ -148,62 +140,7 @@ export function DirectorsThresholdForm() {
   );
 }
 
-/**
- * Loading skeleton component
- */
-function LoadingSkeleton() {
-  return (
-    <div className="space-y-4" role="status" aria-label="Loading directors">
-      <div className="h-8 bg-gray-200 rounded animate-pulse" />
-      <div className="space-y-3">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="flex items-center gap-4">
-            <div className="h-12 flex-1 bg-gray-200 rounded animate-pulse" />
-            <div className="h-12 w-20 bg-gray-200 rounded animate-pulse" />
-          </div>
-        ))}
-      </div>
-      <span className="sr-only">Loading directors...</span>
-    </div>
-  );
-}
-
-/**
- * Error message component
- */
-function ErrorMessage({ error }: { error: string }) {
-  return (
-    <div
-      className="p-6 bg-red-50 border border-red-200 rounded-lg"
-      role="alert"
-      aria-live="assertive"
-    >
-      <div className="flex items-start gap-3">
-        <svg
-          className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-        <div>
-          <h3 className="font-semibold text-red-900 mb-1">Error</h3>
-          <p className="text-red-700">{error}</p>
-          <p className="text-sm text-red-600 mt-2">
-            Please try again or adjust your threshold value.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+// Using shared Skeleton and ErrorMessage components from core/ui
 
 /**
  * Empty state component

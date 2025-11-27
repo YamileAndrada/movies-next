@@ -37,8 +37,8 @@ describe("MoviesFilters", () => {
     it("renders genre checkboxes", () => {
       render(<MoviesFilters {...defaultProps} />);
 
-      const checkboxes = screen.queryAllByRole("checkbox");
-      expect(checkboxes.length).toBeGreaterThanOrEqual(3);
+      const options = screen.queryAllByRole("option");
+      expect(options.length).toBeGreaterThanOrEqual(3);
     });
 
     it("renders apply filters button when realtime disabled", () => {
@@ -99,12 +99,11 @@ describe("MoviesFilters", () => {
     it("allows selecting genres", async () => {
       render(<MoviesFilters {...defaultProps} />);
 
-      const checkboxes = screen.queryAllByRole("checkbox");
-      const firstCheckbox = checkboxes[0] as HTMLInputElement;
+      const listbox = getFirstByRole("listbox");
+      await userEvent.selectOptions(listbox, ["Action"]);
 
-      await userEvent.click(firstCheckbox);
-
-      expect(firstCheckbox.checked).toBe(true);
+      const firstOption = screen.getAllByRole("option", { name: /Action/i })[0] as HTMLOptionElement;
+      expect(firstOption.selected).toBe(true);
     });
   });
 

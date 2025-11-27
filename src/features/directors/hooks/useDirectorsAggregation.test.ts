@@ -281,8 +281,8 @@ describe("useDirectorsAggregation", () => {
       expect(result.current.loading).toBe(false);
     });
 
-    // All directors have count > -1
-    expect(result.current.directors).toHaveLength(2);
+    // Requirement: threshold < 0 should return empty list (no error)
+    expect(result.current.directors).toHaveLength(0);
   });
 
   it("should re-fetch when threshold changes", async () => {

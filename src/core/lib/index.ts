@@ -10,6 +10,7 @@ export {
   parseYear,
   parseRuntime,
   parseCommaSeparated,
+  removeAccents,
   normalizeDirectorName,
   normalizeGenreName,
   movieMatchesQuery,

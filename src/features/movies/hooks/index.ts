@@ -6,3 +6,8 @@ export {
   type MoviesSearchFilters,
   type UseMoviesSearchResult,
 } from "./useMoviesSearch";
+
+export {
+  useFilterOptions,
+  type UseFilterOptionsResult,
+} from "./useFilterOptions";
