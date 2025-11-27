@@ -1,0 +1,1 @@
+export { moviesService } from "./moviesService";

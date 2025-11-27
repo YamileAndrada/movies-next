@@ -50,7 +50,8 @@ describe("DirectorsThresholdForm", () => {
 
       const input = screen.getByLabelText(/minimum movie count/i);
       expect(input).toHaveAttribute("id", "threshold-input");
-      expect(input).toHaveAttribute("type", "number");
+      expect(input).toHaveAttribute("type", "text");
+      expect(input).toHaveAttribute("inputMode", "numeric");
     });
 
     it("should show help text by default", () => {
@@ -166,7 +167,7 @@ describe("DirectorsThresholdForm", () => {
   });
 
   describe("Loading state", () => {
-    it("should show button as disabled and text as Calculating when loading", async () => {
+    it("should show button as disabled with loading spinner when loading", async () => {
       const user = userEvent.setup();
       render(<DirectorsThresholdForm />);
 
@@ -185,7 +186,8 @@ describe("DirectorsThresholdForm", () => {
       await waitFor(() => {
         const button = screen.getByRole("button", { name: /calculate directors/i });
         expect(button).toBeDisabled();
-        expect(button).toHaveTextContent("Calculating...");
+        expect(button).toHaveAttribute("aria-busy", "true");
+        expect(button).toHaveTextContent("Calculate"); // Text doesn't change, just shows spinner
       });
     });
 
@@ -206,7 +208,7 @@ describe("DirectorsThresholdForm", () => {
       expect(input).toBeDisabled();
       const button = screen.getByRole("button", { name: /calculate directors/i });
       expect(button).toBeDisabled();
-      expect(button).toHaveTextContent("Calculating...");
+      expect(button).toHaveAttribute("aria-busy", "true");
     });
   });
 

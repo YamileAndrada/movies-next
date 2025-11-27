@@ -1,0 +1,1 @@
+export { directorsService } from "./directorsService";

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { fetchAllMovies } from "@/core/api/moviesApi";
-import { aggregateDirectors, type DirectorCount } from "../aggregators";
+import { directorsService } from "../services";
+import type { DirectorCount } from "../aggregators";
 import type { ApiError } from "@/core/api/types";
 
 /**
@@ -14,6 +14,9 @@ export interface UseDirectorsAggregationResult {
 
 /**
  * Hook for aggregating directors by movie count with threshold filtering
+ *
+ * This hook only manages React state and side effects. All business logic
+ * and API calls are delegated to the directorsService layer.
  *
  * @param threshold - Minimum movie count (directors must have > threshold movies)
  * @returns Object with directors array, loading state, and error
@@ -60,26 +63,21 @@ export function useDirectorsAggregation(
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
-    // Async function to fetch and aggregate
-    const fetchAndAggregate = async () => {
+    // Async function to fetch directors using service layer
+    const fetchDirectors = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        // Fetch all movies with cancellation support
-        const movies = await fetchAllMovies(abortController.signal);
-
-        // Check if request was cancelled
-        if (abortController.signal.aborted) {
-          return;
-        }
-
-        // Aggregate directors
-        const aggregatedDirectors = aggregateDirectors(movies, threshold);
+        // Delegate to service layer (no business logic here)
+        const result = await directorsService.getByThreshold(
+          threshold,
+          abortController.signal
+        );
 
         // Only update state if request wasn't cancelled
         if (!abortController.signal.aborted) {
-          setDirectors(aggregatedDirectors);
+          setDirectors(result);
           setError(null);
         }
       } catch (err) {
@@ -96,7 +94,7 @@ export function useDirectorsAggregation(
       }
     };
 
-    fetchAndAggregate();
+    fetchDirectors();
 
     // Cleanup: abort request on unmount or threshold change
     return () => {
