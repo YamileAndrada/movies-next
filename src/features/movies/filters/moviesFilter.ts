@@ -1,4 +1,4 @@
-import { normalizeMovie, removeAccents, type NormalizedMovie } from "@/core/lib";
+import { removeAccents, type NormalizedMovie } from "@/core/lib";
 import type { MoviesSearchFilters } from "../hooks/useMoviesSearch";
 
 /**

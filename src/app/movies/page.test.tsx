@@ -9,10 +9,19 @@ const getFirstByText = (text: string | RegExp) => screen.getAllByText(text)[0];
 const getFirstByRole = (role: string, options?: any) =>
   screen.getAllByRole(role, options)[0];
 
-// Mock the useMoviesSearch hook
+// Mock the hooks
 const mockUseMoviesSearch = vi.fn();
+const mockUseFilterOptions = vi.fn(() => ({
+  directors: ["Lana Wachowski", "Christopher Nolan"],
+  genres: ["Action", "Sci-Fi", "Drama"],
+}));
+
 vi.mock("@/features/movies/hooks/useMoviesSearch", () => ({
   useMoviesSearch: (filters: any, page: any) => mockUseMoviesSearch(filters, page),
+}));
+
+vi.mock("@/features/movies/hooks/useFilterOptions", () => ({
+  useFilterOptions: () => mockUseFilterOptions(),
 }));
 
 describe("MoviesPage", () => {

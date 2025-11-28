@@ -9,14 +9,14 @@ describe("Home Page", () => {
 
   it("should render the page title", () => {
     render(<Home />);
-    expect(screen.getByText("Movies Challenge")).toBeDefined();
+    expect(screen.getByText("Movies Explorer")).toBeDefined();
   });
 
   it("should render navigation links", () => {
     render(<Home />);
 
     const directorsLink = screen.getByRole("link", {
-      name: /directors by threshold/i,
+      name: /directors analysis/i,
     }) as HTMLAnchorElement;
     const moviesLink = screen.getByRole("link", {
       name: /explore movies/i,

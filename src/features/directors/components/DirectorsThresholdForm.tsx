@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import Link from "next/link";
 import { useDirectorsAggregation } from "../hooks";
 import { Input, Button, SkeletonText, SkeletonBox, ErrorMessage } from "@/core/ui";
 
@@ -58,10 +59,31 @@ export function DirectorsThresholdForm() {
   return (
     <div className="w-full max-w-4xl mx-auto p-6 animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
-          Directors Analysis
-        </h1>
-        <p className="text-gray-600">
+        <div className="flex items-center gap-3 mb-2">
+          <Link
+            href="/"
+            className="group flex items-center justify-center w-10 h-10 rounded-lg bg-white border border-gray-200 hover:border-gray-900 hover:bg-gray-900 transition-all duration-200 shadow-sm hover:shadow-md"
+            aria-label="Back to home"
+          >
+            <svg
+              className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+          </Link>
+          <h1 className="text-4xl font-bold text-gray-900">
+            Directors Analysis
+          </h1>
+        </div>
+        <p className="text-gray-600 ml-13">
           Find directors who have directed more than a specified number of movies
         </p>
       </div>

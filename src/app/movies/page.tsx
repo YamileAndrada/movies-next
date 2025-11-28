@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, lazy, Suspense } from "react";
+import Link from "next/link";
 import { MoviesFilters } from "@/features/movies/components";
 import { useMoviesSearch, useFilterOptions } from "@/features/movies/hooks";
 import type { MoviesSearchFilters } from "@/features/movies/hooks";
@@ -48,10 +49,31 @@ export default function MoviesPage() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="mb-8 animate-fade-in">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Explore Movies
-          </h1>
-          <p className="text-gray-600">
+          <div className="flex items-center gap-3 mb-2">
+            <Link
+              href="/"
+              className="group flex items-center justify-center w-10 h-10 rounded-lg bg-white border border-gray-200 hover:border-gray-900 hover:bg-gray-900 transition-all duration-200 shadow-sm hover:shadow-md"
+              aria-label="Back to home"
+            >
+              <svg
+                className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+            </Link>
+            <h1 className="text-4xl font-bold text-gray-900">
+              Explore Movies
+            </h1>
+          </div>
+          <p className="text-gray-600 ml-13">
             Search and filter through our movie collection
           </p>
         </div>

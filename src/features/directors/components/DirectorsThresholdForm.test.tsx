@@ -35,7 +35,7 @@ describe("DirectorsThresholdForm", () => {
       render(<DirectorsThresholdForm />);
 
       expect(
-        screen.getByRole("heading", { name: /directors by threshold/i })
+        screen.getByRole("heading", { name: /directors analysis/i })
       ).toBeInTheDocument();
       expect(
         screen.getByLabelText(/minimum movie count/i)

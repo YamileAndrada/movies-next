@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Directors by Threshold Flow', () => {
+test.describe('Directors Analysis Flow', () => {
   test('should complete full directors workflow: input threshold → calculate → view results', async ({ page }) => {
     // Navigate to directors page
     await page.goto('/directors');
 
     // Verify page loaded
-    await expect(page.getByRole('heading', { name: /directors by threshold/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /directors analysis/i })).toBeVisible();
 
     // Find and fill the threshold input
     const thresholdInput = page.getByLabel(/minimum movie count/i);

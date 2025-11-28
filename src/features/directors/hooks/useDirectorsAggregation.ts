@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import useSWR from "swr";
 import { directorsService } from "../services";
 import type { DirectorCount } from "../aggregators";
 import type { ApiError } from "@/core/api/types";
@@ -15,8 +15,8 @@ export interface UseDirectorsAggregationResult {
 /**
  * Hook for aggregating directors by movie count with threshold filtering
  *
- * This hook only manages React state and side effects. All business logic
- * and API calls are delegated to the directorsService layer.
+ * Uses SWR for automatic caching, deduplication, and revalidation.
+ * All business logic and API calls are delegated to the directorsService layer.
  *
  * @param threshold - Minimum movie count (directors must have > threshold movies)
  * @returns Object with directors array, loading state, and error
@@ -36,71 +36,22 @@ export interface UseDirectorsAggregationResult {
 export function useDirectorsAggregation(
   threshold: number
 ): UseDirectorsAggregationResult {
-  const [directors, setDirectors] = useState<DirectorCount[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
+  // Only fetch when threshold is valid (finite and non-negative)
+  const shouldFetch = Number.isFinite(threshold) && threshold >= 0;
 
-  // Store AbortController to cancel previous requests
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    // Validate threshold - must be finite and non-negative
-    if (!Number.isFinite(threshold) || threshold < 0) {
-      setError(null);
-      setDirectors([]);
-      setLoading(false);
-      return;
+  const { data, error, isValidating } = useSWR(
+    shouldFetch ? `directors-threshold-${threshold}` : null,
+    () => directorsService.getByThreshold(threshold),
+    {
+      dedupingInterval: 30000, // Dedupe requests within 30 seconds
+      revalidateOnFocus: false, // Don't refetch on window focus
+      errorRetryCount: 1, // Only retry failed requests once
     }
+  );
 
-    // No module-level cache: keep behavior predictable for tests and freshness
-
-    // Cancel previous request if it exists
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    // Create new AbortController for this request
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-
-    // Async function to fetch directors using service layer
-    const fetchDirectors = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        // Delegate to service layer (no business logic here)
-        const result = await directorsService.getByThreshold(
-          threshold,
-          abortController.signal
-        );
-
-        // Only update state if request wasn't cancelled
-        if (!abortController.signal.aborted) {
-          setDirectors(result);
-          setError(null);
-        }
-      } catch (err) {
-        // Only update error state if request wasn't cancelled
-        if (!abortController.signal.aborted) {
-          setError(err as ApiError);
-          setDirectors([]);
-        }
-      } finally {
-        // Only update loading state if request wasn't cancelled
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchDirectors();
-
-    // Cleanup: abort request on unmount or threshold change
-    return () => {
-      abortController.abort();
-    };
-  }, [threshold]); // Re-run when threshold changes
-
-  return { directors, loading, error };
+  return {
+    directors: data ?? [],
+    loading: isValidating,
+    error: (error as ApiError) ?? null,
+  };
 }
