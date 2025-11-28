@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     "React",
     "TypeScript",
   ],
+  icons: {
+    icon: '/favicon.svg'
+  }
 };
 
 export default function RootLayout({
