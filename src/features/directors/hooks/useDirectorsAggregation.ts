@@ -44,8 +44,8 @@ export function useDirectorsAggregation(
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    // Validate threshold
-    if (!Number.isFinite(threshold)) {
+    // Validate threshold - must be finite and non-negative
+    if (!Number.isFinite(threshold) || threshold < 0) {
       setError(null);
       setDirectors([]);
       setLoading(false);

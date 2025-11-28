@@ -60,8 +60,10 @@ export function useMoviesSearch(
   const validPage = typeof page === 'number' && page >= 1 ? page : 1;
 
   // Fetch all movies once (cached by SWR)
+  // Note: We use "all-movies" as key since we fetch all data once and filter client-side
+  // This provides better performance than refetching on every filter change
   const { data: allMovies, error, isValidating } = useSWR(
-    "all-movies",
+    "all-movies", // Global cache key - all movies fetched once
     () => moviesService.getAll(),
     {
       dedupingInterval: 30000, // Cache for 30 seconds

@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import {
-  MoviesFilters,
-  MoviesTable,
-  MovieDetailsModal,
-} from "@/features/movies/components";
+import { useState, useCallback, lazy, Suspense } from "react";
+import { MoviesFilters } from "@/features/movies/components";
 import { useMoviesSearch, useFilterOptions } from "@/features/movies/hooks";
 import type { MoviesSearchFilters } from "@/features/movies/hooks";
 import type { NormalizedMovie } from "@/core/lib";
+
+// Lazy load heavy components for better performance
+const MoviesTable = lazy(() => import("@/features/movies/components/MoviesTable").then(m => ({ default: m.MoviesTable })));
+const MovieDetailsModal = lazy(() => import("@/features/movies/components/MovieDetailsModal").then(m => ({ default: m.MovieDetailsModal })));
 
 /**
  * Movies Explorer Page
@@ -179,23 +179,35 @@ export default function MoviesPage() {
             )}
 
             {(loading || movies.length > 0) && (
-              <MoviesTable
-                movies={movies}
-                loading={loading}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setPage}
-                onMovieClick={setSelectedMovie}
-              />
+              <Suspense fallback={
+                <div className="bg-white rounded-lg shadow-sm p-8">
+                  <div className="animate-pulse space-y-4">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                  </div>
+                </div>
+              }>
+                <MoviesTable
+                  movies={movies}
+                  loading={loading}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                  onMovieClick={setSelectedMovie}
+                />
+              </Suspense>
             )}
           </div>
         </div>
 
         {/* Movie Details Modal */}
-        <MovieDetailsModal
-          movie={selectedMovie}
-          onClose={() => setSelectedMovie(null)}
-        />
+        <Suspense fallback={null}>
+          <MovieDetailsModal
+            movie={selectedMovie}
+            onClose={() => setSelectedMovie(null)}
+          />
+        </Suspense>
       </div>
     </main>
   );

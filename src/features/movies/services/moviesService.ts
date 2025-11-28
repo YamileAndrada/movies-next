@@ -53,17 +53,19 @@ export const moviesService = {
   /**
    * Get all movies without filters or pagination
    *
+   * @param signal - Optional AbortSignal for request cancellation
    * @returns Array of all normalized movies
    *
    * @throws {ApiError} If API request fails
    *
    * @example
    * ```typescript
-   * const movies = await moviesService.getAll();
+   * const controller = new AbortController();
+   * const movies = await moviesService.getAll(controller.signal);
    * ```
    */
-  async getAll(): Promise<NormalizedMovie[]> {
-    const rawMovies = await fetchAllMovies();
+  async getAll(signal?: AbortSignal): Promise<NormalizedMovie[]> {
+    const rawMovies = await fetchAllMovies(signal);
     return rawMovies.map(normalizeMovie);
   },
 };
