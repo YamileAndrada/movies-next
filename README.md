@@ -134,7 +134,7 @@ Configure via `NEXT_PUBLIC_API_BASE_URL` environment variable.
 - ✅ Client-side filtering and pagination for optimal UX
 - ✅ Request deduplication and caching with SWR
 - ✅ Fully accessible (ARIA, keyboard navigation, screen reader support)
-- ✅ Comprehensive test coverage (256 tests)
+- ✅ Comprehensive test coverage (250 tests)
 - ✅ TypeScript strict mode
 - ✅ Responsive design
 
