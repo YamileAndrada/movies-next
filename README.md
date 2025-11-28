@@ -2,7 +2,7 @@
 
 Movie search and director analysis application built with Next.js 15, TypeScript, and TanStack Table.
 
-**Test Coverage: 256/256 (100%)** | **TypeScript Strict Mode** | **Fully Accessible**
+ **TypeScript Strict Mode** | **Fully Accessible**
 
 ## Features
 
@@ -138,10 +138,5 @@ Configure via `NEXT_PUBLIC_API_BASE_URL` environment variable.
 - ✅ TypeScript strict mode
 - ✅ Responsive design
 
-## License
-
-ISC
-
 ---
 
-🤖 **Built with Claude Code**
