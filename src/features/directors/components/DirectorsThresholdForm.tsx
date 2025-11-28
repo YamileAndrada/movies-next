@@ -56,12 +56,13 @@ export function DirectorsThresholdForm() {
   const hasResults = directors.length > 0;
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6">
+    <div className="w-full max-w-4xl mx-auto p-6 animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Directors by Threshold</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          Directors Analysis
+        </h1>
         <p className="text-gray-600">
-          Find directors who have directed more than a specified number of
-          movies
+          Find directors who have directed more than a specified number of movies
         </p>
       </div>
 
@@ -154,24 +155,26 @@ function EmptyState({ threshold }: { threshold: number }) {
 
   return (
     <div
-      className="p-8 bg-gray-50 border border-gray-200 rounded-lg text-center"
+      className="p-12 bg-white rounded-2xl border border-gray-100 shadow-lg text-center animate-scale-in"
       role="status"
     >
-      <svg
-        className="w-16 h-16 mx-auto mb-4 text-gray-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-        />
-      </svg>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <div className="w-20 h-20 mx-auto bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mb-4">
+        <svg
+          className="w-10 h-10 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+      </div>
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">
         No Results Found
       </h3>
       <p className="text-gray-600 mb-4">{message}</p>
@@ -193,22 +196,27 @@ function DirectorsList({
   threshold: number;
 }) {
   return (
-    <div>
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold">
-          Found {directors.length} director{directors.length === 1 ? "" : "s"}{" "}
-          with more than {threshold} movie{threshold === 1 ? "" : "s"}
-        </h2>
+    <div className="animate-slide-up">
+      <div className="mb-6">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-accent-50 to-accent-100/50 rounded-full border border-accent-200">
+          <svg className="w-5 h-5 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h2 className="text-lg font-semibold text-accent-900">
+            Found {directors.length} director{directors.length === 1 ? "" : "s"}{" "}
+            with more than {threshold} movie{threshold === 1 ? "" : "s"}
+          </h2>
+        </div>
       </div>
 
       <div
-        className="bg-white border border-gray-200 rounded-lg overflow-hidden"
+        className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-lg"
         role="table"
         aria-label="Directors list"
       >
         {/* Table Header */}
         <div
-          className="grid grid-cols-[1fr_auto] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 font-semibold text-sm text-gray-700"
+          className="grid grid-cols-[1fr_auto] gap-4 px-6 py-4 bg-gradient-to-r from-accent-50 to-accent-100/30 border-b border-accent-100 font-semibold text-sm text-accent-900"
           role="row"
         >
           <div role="columnheader">Director Name</div>
@@ -222,8 +230,8 @@ function DirectorsList({
           {directors.map((director, index) => (
             <div
               key={`${director.name}-${director.count}`}
-              className={`grid grid-cols-[1fr_auto] gap-4 px-6 py-4 hover:bg-gray-50 transition-colors ${
-                index !== directors.length - 1 ? "border-b border-gray-200" : ""
+              className={`grid grid-cols-[1fr_auto] gap-4 px-6 py-4 hover:bg-gradient-to-r hover:from-primary-50/50 hover:to-transparent transition-all duration-200 ${
+                index !== directors.length - 1 ? "border-b border-gray-100" : ""
               }`}
               role="row"
               tabIndex={0}
@@ -239,7 +247,7 @@ function DirectorsList({
               </div>
               <div
                 role="cell"
-                className="text-right font-semibold text-blue-600"
+                className="text-right font-bold text-gray-900"
               >
                 {director.count}
               </div>

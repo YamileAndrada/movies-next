@@ -44,10 +44,10 @@ export default function MoviesPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-50">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             Explore Movies
           </h1>
@@ -59,28 +59,30 @@ export default function MoviesPage() {
         {/* Error State */}
         {error && (
           <div
-            className="bg-red-50 border-l-4 border-red-500 p-4 mb-6"
+            className="bg-gradient-to-r from-red-50 to-red-100/50 border border-red-200 rounded-xl p-6 mb-6 shadow-md animate-scale-in"
             role="alert"
           >
-            <div className="flex">
+            <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                  <svg
+                    className="h-6 w-6 text-white"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-red-900 mb-1">
                   Error loading movies
                 </h3>
-                <p className="mt-1 text-sm text-red-700">
+                <p className="text-sm text-red-700">
                   {error.message || "An unexpected error occurred"}
                 </p>
               </div>
@@ -89,40 +91,44 @@ export default function MoviesPage() {
         )}
 
         {/* Main Content */}
-        <div className="space-y-6">
+        <div className="space-y-6 animate-slide-up">
           {/* Filters Section - Collapsible */}
-          <div className="bg-white rounded-lg shadow-sm overflow-visible">
+          <div className="bg-white rounded-2xl shadow-lg overflow-visible border border-gray-100">
             <button
               onClick={() => setFiltersExpanded(!filtersExpanded)}
-              className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+              className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-gradient-to-r hover:from-primary-50/50 hover:to-transparent transition-all duration-200"
               aria-expanded={filtersExpanded}
               aria-controls="filters-content"
             >
-              <div className="flex items-center gap-2">
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                  />
-                </svg>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Filters
-                </h2>
-                {!filtersExpanded && Object.keys(filters).length > 0 && (
-                  <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                    {Object.values(filters).filter(v => v !== undefined && v !== '' && (Array.isArray(v) ? v.length > 0 : true)).length} active
-                  </span>
-                )}
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary-100 to-primary-200 rounded-lg flex items-center justify-center">
+                  <svg
+                    className="w-5 h-5 text-primary-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                    />
+                  </svg>
+                </div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Filters
+                  </h2>
+                  {!filtersExpanded && Object.keys(filters).length > 0 && (
+                    <span className="px-2.5 py-1 text-xs font-semibold bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-sm">
+                      {Object.values(filters).filter(v => v !== undefined && v !== '' && (Array.isArray(v) ? v.length > 0 : true)).length}
+                    </span>
+                  )}
+                </div>
               </div>
               <svg
-                className={`w-5 h-5 text-gray-500 transition-transform ${
+                className={`w-5 h-5 text-primary-600 transition-transform duration-200 ${
                   filtersExpanded ? "rotate-180" : ""
                 }`}
                 fill="none"
@@ -139,7 +145,7 @@ export default function MoviesPage() {
             </button>
 
             {filtersExpanded && (
-              <div id="filters-content" className="px-6 pb-6 border-t border-gray-100">
+              <div id="filters-content" className="px-6 pb-6 pt-4 border-t border-gray-100 bg-gradient-to-b from-gray-50/50 to-transparent">
                 <MoviesFilters
                   filters={filters}
                   onFiltersChange={handleFiltersChange}
@@ -155,24 +161,26 @@ export default function MoviesPage() {
           {/* Results Section */}
           <div>
             {!loading && !error && movies.length === 0 && (
-              <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
-                  />
-                </svg>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center animate-scale-in">
+                <div className="w-20 h-20 mx-auto bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mb-4">
+                  <svg
+                    className="h-10 w-10 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   No movies found
                 </h3>
-                <p className="mt-2 text-gray-500">
+                <p className="text-gray-600">
                   Try adjusting your filters to see more results
                 </p>
               </div>
@@ -180,11 +188,12 @@ export default function MoviesPage() {
 
             {(loading || movies.length > 0) && (
               <Suspense fallback={
-                <div className="bg-white rounded-lg shadow-sm p-8">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
                   <div className="animate-pulse space-y-4">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded"></div>
-                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                    <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-100 rounded-lg w-3/4"></div>
+                    <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-100 rounded-lg"></div>
+                    <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-100 rounded-lg w-5/6"></div>
+                    <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-100 rounded-lg w-2/3"></div>
                   </div>
                 </div>
               }>
